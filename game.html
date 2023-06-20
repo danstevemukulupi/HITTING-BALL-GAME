@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <title>Game</title>
+
+        <style type="text/css">
+            * {
+                padding:0;
+                margin: 0;
+            }
+
+            body {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              height: 100vh;
+          }
+            canvas {
+                background:#eee;
+                display: block;
+                margin-bottom: 20px;
+
+            }
+
+            h1 {
+              text-align: center;
+              font-family: Arial, sans-serif;
+              font-size: 24px;
+              color: #dd0095;
+              margin-top: 20px;
+            }
+
+            #startButton {
+              
+              color: #dd0095;
+              font-size: 18px;
+              padding: 10px 20px;
+              cursor: pointer;
+              margin-bottom: 20px;    
+              
+            }
+              
+        </style>
+
+    </head>
+
+    <body>
+ 
+        <h1>HITTING BALL</h1>
+        
+        <canvas id="myCanvas" width="500" height="420"></canvas>
+        <button id= "startButton"  type = "button">START</button>
+        
+
+        <script type="text/javascript">
+
+            const canvas = document.getElementById("myCanvas");
+            const ctx = canvas.getContext("2d");
+            
+            // Start & Pause
+            let cancelGame = "";
+
+            //Width and Height 
+            let x = canvas.width / 2;
+            let y = canvas.height -20;
+
+            //Ball Direction
+             let directionX = 6;
+             let directionY = -4;
+
+             //GameRadius 
+             const bRadius = 20;
+             
+            // Draw the skateboard
+             const padWidth = 200;
+             const padHeight = 20;
+             let padX = (canvas.width - padWidth) / 2;
+
+            // Score
+            let score = 0;
+            
+            // Lives
+            let lives = 5;
+
+            // Start 
+            let playing = false;
+            let startBtn;
+
+             //Buttons
+             let rightClicked = false;
+             let leftClicked = false;
+
+             // The Bricks Variable
+             const brickRowCount = 4;
+             const brickColumnCount = 6;
+             const brickWidth = 70;
+             const brickHeight = 30;
+             const brickPadding = 10;
+             const brickOffsetTop = 30;
+             const brickOffsetLeft = 30;
+
+             const bricks = [];
+             for (let c = 0; c < brickColumnCount; c++) {
+             bricks[c] = [];
+             for (let r = 0; r < brickRowCount; r++) {
+             bricks[c][r] = { x: 0, y: 0 , status: 1};
+             }
+           }
+
+            //Event Listeners
+            document.addEventListener("keydown", keyDownHandler, false);
+            document.addEventListener("keyup", keyUpHandler, false);
+            document.addEventListener("mousemove", mouseMoveHandler, false);
+            
+
+            function keyDownHandler(e) {
+                if (e.key === "Right" || e.key === "ArrowRight") {
+                  rightClicked = true;
+                } else if (e.key === "Left" || e.key === "ArrowLeft") {
+                  leftClicked= true;
+                }
+              }
+              
+              function keyUpHandler(e) {
+                if (e.key === "Right" || e.key === "ArrowRight") {
+                  rightClicked = false;
+                } else if (e.key === "Left" || e.key === "ArrowLeft") {
+                  leftClicked = false;
+                }
+              }
+
+             //Mouse Movement
+             function mouseMoveHandler(e) {
+                const relativeX = e.clientX - canvas.offsetLeft;
+                if (relativeX > 0 && relativeX < canvas.width) {
+                  padX = relativeX - padWidth / 2;
+                }
+              }
+
+            // Make collision
+            function collisionDetection() {
+                for (let c = 0; c < brickColumnCount; c++) {
+                  for (let r = 0; r < brickRowCount; r++) {
+                    const b = bricks[c][r];
+                    if (b.status === 1) {
+                    if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                      directionY = -directionY;
+                      b.status = 0;
+                      score ++; // Allow to award a score each time a brick is hit
+                      if (score === brickRowCount * brickColumnCount) {
+                      alert("CONGRATULATIONS, YOU WON THE GAME!");
+                      document.location.reload();
+
+                    }
+                  }
+                }
+              }
+            }
+        }   
+             
+            // Create Score
+            function createScore () {
+             
+                ctx.font = "18px Arial";
+                ctx.fillStyle = "#dd0095";
+                ctx.fillText(`Score: ${score}`, 8, 20);
+
+            }
+
+            //Lives of playing
+            function createLives() {
+                ctx.font = "18px Arial";
+                ctx.fillStyle = "#dd0095";
+                ctx.fillText(`Lives: ${lives}`, canvas.width - 65, 20);
+
+            }
+            // create pacman
+             function createPacman() {
+                // An arc with an opening at the right for the mouth
+             ctx.beginPath();
+             ctx.arc(x, y, bRadius, 0.2 * Math.PI, 1.8 * Math.PI, false);
+
+             // The mouth
+            // A line from the end of the arc to the centre
+            ctx.lineTo(x, y);
+
+             // A line from the centre of the arc to the start
+            ctx.closePath();
+
+           // Fill the pacman shape with yellow
+            ctx.fillStyle = '#dd0095';
+            ctx.fill();
+
+             // Draw the black outline (optional)
+            ctx.stroke();
+
+
+             }
+
+            //functions
+            function createBall (){
+              ctx.beginPath();  
+              ctx.arc(x, y, bRadius , 0, Math.PI * 2);
+              ctx.fillStyle = "#dd0095";
+              ctx.fill();
+              ctx.closePath();
+                
+            } 
+
+            function createPaddle () {
+
+                ctx.beginPath();
+                ctx.moveTo(padX, canvas.height - padHeight); // Move to the starting point
+                ctx.lineTo(padX + padWidth / 2, canvas.height - padHeight * 2); // Draw diagonal line
+                ctx.lineTo(padX + padWidth, canvas.height - padHeight); // Draw another diagonal line
+                ctx.lineTo(padX, canvas.height - padHeight); // Close the path
+                ctx.fillStyle = '#dd0095';
+                ctx.fill();
+                ctx.closePath();
+
+                ctx.beginPath();
+                ctx.arc(padX + padWidth / 4, canvas.height - padHeight, padHeight / 2, 0, Math.PI * 2); // Draw the left wheel
+                ctx.arc(padX + (padWidth / 4) * 3, canvas.height - padHeight, padHeight / 2, 0, Math.PI * 2); // Draw the right wheel
+                ctx.fillStyle = 'white';
+                ctx.fill();
+                ctx.closePath();
+
+            }
+
+             // Draw Bricks
+            function createBricks() {
+            for (let c = 0; c < brickColumnCount; c++) {
+              for (let r = 0; r < brickRowCount; r++) {
+                if (bricks[c][r].status == 1) {
+                const brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                const brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
+                bricks[c][r].x = brickX;
+                bricks[c][r].y = brickY;
+                ctx.beginPath();
+                ctx.arc(brickX + brickWidth / 2, brickY + brickHeight / 2, Math.min(brickWidth, brickHeight) / 2, 0, Math.PI * 2);
+                ctx.fillStyle = '#dd0095';
+                ctx.fill();
+                ctx.closePath();
+
+              }
+            }
+          }
+        }
+            // CREATE THE BALL
+            function startBall (){
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              createBricks();
+              createPaddle();
+              createPacman();
+              collisionDetection();
+              createScore();
+              createLives();
+                    
+            //Bouncing off the left and right
+            if ( x + directionX > canvas.width || x + directionX < bRadius) {
+               directionX = -directionX;
+             }
+            
+             if (y + directionY < bRadius) {
+                directionY = -directionY;
+              } else if (y + directionY > canvas.height - bRadius) {
+                if (x > padX && x < padX + padWidth) {
+                  directionY = -directionY;
+                } else {
+                    lives--;
+                    if(!lives) {
+
+                  alert("YOU LOST THE GAME, TRY AGAIN");
+                  document.location.reload();
+                }
+                else {
+
+                x = canvas.width/2;
+                y = canvas.height-20;
+                let directionX = 6;
+                let directionY = -4;
+                padX = (canvas.width-padWidth)/2;
+                }
+            }
+        }
+                    
+             //skateboard moving logic
+             if (rightClicked) {
+                padX += 7;
+                if (padX + padWidth > canvas.width){
+                padX = canvas.width - padWidth;
+                }   
+                
+            }
+            else if(leftClicked) {
+                padX -= 8;
+                if (padX < 0){
+                    padX = 0;
+                }
+            }
+   
+              x += directionX;
+              y += directionY;
+              cancelGame= requestAnimationFrame(startBall);
+
+            }
+            //startBall();
+            function startGame (event) {
+              if(this.textContent === "START") {
+                requestAnimationFrame(startBall);
+                this.textContent = "PAUSE";
+              }
+              else {
+                cancelAnimationFrame(cancelGame);
+                this.textContent = 'START';
+
+              }
+
+            }
+            let startButton = document.getElementById('startButton');
+            startButton.addEventListener('click', startGame, false);
+
+        </script>
+    </body>
+</html>
