@@ -118,10 +118,7 @@ or
 
 ```
 .
-├── index.html
-├── style.css
-├── script.js
-├── assets/
+├── game.html
 └── README.md
 ```
 
