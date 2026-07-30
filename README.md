@@ -66,7 +66,7 @@ git clone https://git@github.com:danstevemukulupi/HITTING-BALL-GAME.git
 ### Navigate into the project
 
 ```bash
-cd YOUR-REPOSITORY-NAME
+cd HITTING-BALL-GAME
 ```
 
 ### Run the project
